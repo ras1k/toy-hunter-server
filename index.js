@@ -31,6 +31,7 @@ async function run() {
 
     const toyCollection = client.db('toyDB').collection('toys');
 
+    //Get All Toys
     app.get('/allToys', async (req, res) => {
       let query = {};
       if (req.query?.email) {
@@ -55,6 +56,15 @@ async function run() {
       const result = await toyCollection.insertOne(newToy);
       res.send(result)
     })
+
+    //DeleteToy
+    app.delete('/allToys/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await toyCollection.deleteOne(query);
+      res.send(result)
+  })
 
     //services route
     //   app.get('/toys', async (req, res) => {

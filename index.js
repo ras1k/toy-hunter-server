@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const jwt = require('jsonwebtoken');
 
 const app = express();
 require('dotenv').config()
@@ -38,16 +37,15 @@ async function run() {
         query = { email: req.query.email }
       }
       const result = await toyCollection.find(query).toArray();
-
       res.send(result)
-    })
+    });
 
     app.get('/allToys/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await toyCollection.findOne(query);
       res.send(result)
-    })
+    });
 
     //AddToy
     app.post('/addToy', async (req, res) => {
@@ -55,7 +53,31 @@ async function run() {
       console.log(newToy);
       const result = await toyCollection.insertOne(newToy);
       res.send(result)
-    })
+    });
+
+    //EditToy
+    app.put('/allToys/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedToy = req.body;
+      const toy = {
+          $set: {
+              picture:updatedToy.picture,
+              name:updatedToy.name,
+              sellerName:updatedToy.sellerName,
+              email:updatedToy.email,
+              subCategory:updatedToy.subCategory,
+              price:updatedToy.price,
+              rating:updatedToy.rating,
+              description:updatedToy.description,
+              quantity:updatedToy.quantity
+          }
+      }
+      const result = await toyCollection.updateOne(filter,toy, options);
+      res.send(result)
+  });
 
     //DeleteToy
     app.delete('/allToys/:id', async (req, res) => {
@@ -64,14 +86,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await toyCollection.deleteOne(query);
       res.send(result)
-  })
-
-    //services route
-    //   app.get('/toys', async (req, res) => {
-    //     const cursor = toyCollection.find();
-    //     const result = await cursor.toArray();
-    //     res.send(result);
-    // })
+  });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
